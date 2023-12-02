@@ -5,8 +5,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.antlr.v4.runtime.misc.NotNull;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -14,7 +19,7 @@ import java.util.*;
 @AllArgsConstructor
 @Entity
 @Table(name = "users")
-public class User {
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(columnDefinition = "serial")
@@ -34,15 +39,15 @@ public class User {
     private Set<Role> roleSet = new HashSet<>();
     @ManyToMany(mappedBy = "users")
     private List<Course> courseList = new ArrayList<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private Set<ActivationToken> activationTokens = new HashSet<>();
+    private Boolean locked;
+    private Boolean enabled = false;
 
-    public User(String firstName,
-                String lastName,
-                String email,
-                String phoneNumber,
-                String password,
-                Date dateOfBirth,
-                Set<Role> roleSet,
-                List<Course> courseList) {
+    public User(String firstName, String lastName,
+                String email, String phoneNumber,
+                String password, Date dateOfBirth,
+                Set<Role> roleSet, List<Course> courseList) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -55,13 +60,49 @@ public class User {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "(" +
-                "id = " + id + ", " +
-                "firstName = " + firstName + ", " +
-                "lastName = " + lastName + ", " +
-                "email = " + email + ", " +
-                "phoneNumber = " + phoneNumber + ", " +
-                "password = " + password + ", " +
-                "dateOfBirth = " + dateOfBirth + ")";
+        return "User{" +
+                "id=" + id +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", email='" + email + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", password='" + password + '\'' +
+                ", dateOfBirth=" + dateOfBirth +
+                ", roleSet=" + roleSet +
+                ", courseList=" + courseList +
+                ", locked=" + locked +
+                ", enabled=" + enabled +
+                '}';
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roleSet.stream().map(
+                role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList());
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return !locked;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
     }
 }

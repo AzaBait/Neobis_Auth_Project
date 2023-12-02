@@ -9,10 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,5 +23,10 @@ public class RegistrationController {
         User savedUser = userService.saveUser(userMapper.registerDtoToEntity(registerDto));
         UserDto userDto = userMapper.entityToDto(savedUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(userDto);
+    }
+    @GetMapping("/activate")
+    public ResponseEntity<String> activateUserAccount(@RequestParam("token") String token) {
+        userService.activateUserByToken(token);
+        return ResponseEntity.ok("User account activated successfully!");
     }
 }
