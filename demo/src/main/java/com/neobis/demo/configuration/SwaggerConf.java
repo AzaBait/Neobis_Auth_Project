@@ -7,6 +7,8 @@ import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 
+import java.util.Collections;
+
 @Configuration
 public class SwaggerConf {
 
@@ -16,6 +18,8 @@ public class SwaggerConf {
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("com.neobis.demo"))
                 .paths(PathSelectors.any())
-                .build();
+                .build()
+          //      .protocols(Collections.singleton("https"))
+                .host("neobisauthproject-production.up.railway.app");
     }
 }
