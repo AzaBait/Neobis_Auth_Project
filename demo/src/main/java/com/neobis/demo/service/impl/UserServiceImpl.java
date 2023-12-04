@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     private void sendActivationEmail(String email, String token) {
-    String activationLink = "http://localhost:8080/api/activate?token=" + token;
+    String activationLink = "https://neobisauthproject-production.up.railway.app/api/activate?token=" + token;
     emailService.sendActivationEmail(email, activationLink);
 
 
