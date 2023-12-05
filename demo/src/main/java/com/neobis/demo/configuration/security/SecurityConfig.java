@@ -25,25 +25,25 @@ public class SecurityConfig {
     private final UserServiceImpl userService;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtTokenFilter jwtTokenFilter;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
-                .httpBasic(Customizer.withDefaults())
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/register", "/",
+                        .requestMatchers("/api/register").permitAll()
+                        .requestMatchers("/", "/error",
                                 "/api/activate",
                                 "/login", "/logout",
-                                 "/swagger-ui/**",
-                                 "/v3/api-docs/**",
-                                 "/api/auth/**")
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/api/auth/**")
                         .permitAll()
                         .anyRequest().authenticated()
                 )
-//                .formLogin(Customizer.withDefaults())
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
-                .sessionManagement((session)-> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
     }
 
@@ -54,6 +54,7 @@ public class SecurityConfig {
         authenticationProvider.setUserDetailsService(userService);
         return authenticationProvider;
     }
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();

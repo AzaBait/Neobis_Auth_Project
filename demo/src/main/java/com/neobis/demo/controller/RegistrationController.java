@@ -19,10 +19,9 @@ public class RegistrationController {
     private final UserService userService;
     private final UserMapper userMapper;
     @PostMapping("/register")
-    public ResponseEntity<UserDto> registerNewUser(@Validated @RequestBody RegisterDto registerDto) {
-        User savedUser = userService.saveUser(userMapper.registerDtoToEntity(registerDto));
-        UserDto userDto = userMapper.entityToDto(savedUser);
-        return ResponseEntity.status(HttpStatus.CREATED).body(userDto);
+    public ResponseEntity<String> registerNewUser(@Validated @RequestBody RegisterDto registerDto) {
+        userService.saveUser(userMapper.registerDtoToEntity(registerDto));
+        return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully!");
     }
     @GetMapping("/activate")
     public ResponseEntity<String> activateUserAccount(@RequestParam("token") String token) {

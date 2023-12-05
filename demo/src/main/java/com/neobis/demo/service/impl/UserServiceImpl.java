@@ -8,11 +8,13 @@ import com.neobis.demo.repository.UserRepo;
 import com.neobis.demo.service.ActivationTokenService;
 import com.neobis.demo.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -38,7 +40,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public User saveUser(User user) {
         Optional<User> userWithEmail = userRepo.findByEmail(user.getEmail());
         if (userWithEmail.isPresent()) {
-            throw new IllegalStateException("This email " + user.getEmail() + " is already exists!");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "This email " + user.getEmail() + " is already exists!");
         }
         Role userRole = roleRepo.findByName("ROLE_USER").orElseThrow(
                 ()-> new IllegalStateException("Role 'USER' not found"));
@@ -65,8 +68,5 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private void sendActivationEmail(String email, String token) {
     String activationLink = "https://neobisauthproject-production.up.railway.app/api/activate?token=" + token;
     emailService.sendActivationEmail(email, activationLink);
-
-
     }
-
 }
