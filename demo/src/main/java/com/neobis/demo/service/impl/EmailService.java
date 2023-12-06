@@ -18,4 +18,5 @@ public class EmailService {
         message.setText("To activate your account, click on the link below:\n\n" + activationLink);
         javaMailSender.send(message);
     }
+
 }

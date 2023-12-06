@@ -19,8 +19,14 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
 
     @PostMapping
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest request) throws Exception {
-        String token = authenticationService.authenticateAndGetToken(request);
-        return new ResponseEntity<>(new JwtResponse(token), HttpStatus.CREATED);
+    public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest request) {
+
+        try {
+            String token = authenticationService.authenticateAndGetToken(request);
+            return new ResponseEntity<>(new JwtResponse(token), HttpStatus.CREATED);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        }
+
     }
 }

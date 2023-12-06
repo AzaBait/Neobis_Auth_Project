@@ -7,8 +7,13 @@ import com.neobis.demo.repository.RoleRepo;
 import com.neobis.demo.repository.UserRepo;
 import com.neobis.demo.service.ActivationTokenService;
 import com.neobis.demo.service.UserService;
+import com.sun.security.auth.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.SqlReturnType;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -65,8 +70,24 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         }else throw new IllegalArgumentException("Activation token not found");
     }
 
+    @Override
+    public boolean isEmailVerified(String username) {
+        Optional<User> optionalUser = userRepo.findByEmail(username);
+        return optionalUser.map(User::isEnabled).orElse(false);
+    }
+
     private void sendActivationEmail(String email, String token) {
     String activationLink = "https://neobisauthproject-production.up.railway.app/api/activate?token=" + token;
     emailService.sendActivationEmail(email, activationLink);
     }
+
+    public void resendActivationEmail(String email) {
+        User user = userRepo.findByEmail(email).orElseThrow(() ->
+                new UsernameNotFoundException("User with email " + email + " not found!"));
+        ActivationToken activationToken = activationTokenService.generateActivationToken(user);
+        String activationLink = "https://neobisauthproject-production.up.railway.app/api/activate?token=" + activationToken.getToken();
+        emailService.sendActivationEmail(user.getEmail(), activationLink);
+    }
+
+
 }
