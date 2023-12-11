@@ -35,11 +35,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private final EmailService emailService;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Optional<User> user = userRepo.findByEmail(email);
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Optional<User> user = userRepo.findByUsername(username);
         return user.map(value -> new org.springframework.security.core.userdetails.User(
                         value.getEmail(), value.getPassword(), value.getAuthorities()))
-                .orElseThrow(() -> new UsernameNotFoundException("User with email " + email + " not found!"));
+                .orElseThrow(() -> new UsernameNotFoundException("User with email " + username + " not found!"));
     }
     @Override
     public User saveUser(User user) {
@@ -47,6 +47,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         if (userWithEmail.isPresent()) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, "This email " + user.getEmail() + " is already exists!");
+        }
+        Optional<User> userWithUsername = userRepo.findByUsername(user.getUsername());
+        if (userWithUsername.isPresent()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "This username " + user.getUsername() + " is already exists!");
         }
         Role userRole = roleRepo.findByName("ROLE_USER").orElseThrow(
                 ()-> new IllegalStateException("Role 'USER' not found"));
@@ -72,7 +77,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public boolean isEmailVerified(String username) {
-        Optional<User> optionalUser = userRepo.findByEmail(username);
+        Optional<User> optionalUser = userRepo.findByUsername(username);
         return optionalUser.map(User::isEnabled).orElse(false);
     }
 
