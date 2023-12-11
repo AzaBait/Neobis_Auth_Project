@@ -24,6 +24,7 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(columnDefinition = "serial")
     private Long id;
+    private String username;
     private String firstName;
     private String lastName;
     @Column(unique = true)
@@ -44,10 +45,11 @@ public class User implements UserDetails {
     private Boolean locked;
     private Boolean enabled = false;
 
-    public User(String firstName, String lastName,
+    public User(String username, String firstName, String lastName,
                 String email, String phoneNumber,
                 String password, Date dateOfBirth,
                 Set<Role> roleSet, List<Course> courseList) {
+        this.username = username;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -62,6 +64,7 @@ public class User implements UserDetails {
     public String toString() {
         return "User{" +
                 "id=" + id +
+                ", username='" + username + '\'' +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +
@@ -70,6 +73,7 @@ public class User implements UserDetails {
                 ", dateOfBirth=" + dateOfBirth +
                 ", roleSet=" + roleSet +
                 ", courseList=" + courseList +
+                ", activationTokens=" + activationTokens +
                 ", locked=" + locked +
                 ", enabled=" + enabled +
                 '}';
